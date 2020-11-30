@@ -1,0 +1,167 @@
+
+<responsive-vis vis-width="500" vis-height="300">
+    <vis-scale min-dependent="0" max-dependent="50" min-independent="0" max-independent="100">
+        <data-point size="10" independent="20" dependent="40"></data-point>
+        <axis-left></axis-left>
+        <axis-bottom></axis-bottom>
+    </vis-scale>
+</responsive-vis>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.2.0/d3.min.js" integrity="sha512-C2RveGuPIWqkaLAluvoxyiaN1XYNe5ss11urhZWZYBUA9Ydgj+hfGKPcxCzTwut1/fmjEZR7Ac35f2aycT8Ogw==" crossorigin="anonymous"></script>
+<script type="module">
+
+    class ResponsiveVisElement extends HTMLElement {
+        static get observedAttributes() {
+            return ['vis-width', 'vis-height'];
+        }
+
+        constructor() {
+            super();
+            this.setAllAttributes();
+            this.originalChildren = [...this.children];
+        }
+
+        setAllAttributes() {
+            const snakeToCamel = (str) => str.replace(
+                /([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', '')
+            );
+
+            for(const attribute of this.attributes) {
+                const value = `${parseInt(attribute.value)}` === attribute.value ? parseInt(attribute.value) : attribute.value;
+                this[snakeToCamel(attribute.name)] = value;
+            }
+        }
+
+        connectedCallback() {
+            this.setContents();
+        }
+
+        attributeChangedCallback() {
+            this.setAllAttributes();
+            this.setContents();
+        }
+
+        setContents() {
+            const slotHtml = !this.originalChildren.length ? '' :
+                `<foreignObject width="${this.visWidth}" height="${this.visHeight}" id="slot"></foreignObject>`;
+
+            this.innerHTML = this.render() + slotHtml;
+
+            if(this.originalChildren.length) {
+                const slot = this.querySelector('#slot');
+                const provide = this.provideToChildren();
+
+                this.originalChildren.forEach(child => {
+                    for(const attrName in provide) {
+                        child.setAttribute(attrName, provide[attrName]);
+                        child[attrName] = provide[attrName];
+                    }
+                    slot.appendChild(child);
+                });
+            }
+
+            this.doneRendering();
+        }
+
+        provideToChildren() {
+            return {
+                'vis-width': this.visWidth,
+                'vis-height': this.visHeight,
+            };
+        }
+
+        render() {
+            return '';
+        }
+
+        doneRendering() {}
+    }
+
+    class ResponsiveVis extends ResponsiveVisElement {
+        render() {
+            return `
+                <style>svg {position: absolute; width: ${this.visWidth}px; height: ${this.visHeight}px;</style>
+                <svg></svg>`;
+        }
+    }
+
+    class VisScale extends ResponsiveVisElement {
+        provideToChildren() {
+            const superProvided = super.provideToChildren();
+            const flipped = this.visHeight > this.visWidth;
+            const xRange = flipped ? [this.minDependent, this.maxDependent] : [this.minIndependent, this.maxIndependent];
+            const yRange = flipped ? [this.minIndependent, this.maxIndependent] : [this.minDependent, this.maxDependent];
+            const x = d3.scaleLinear().domain(xRange).range([30, this.visWidth - 30]);
+            const y = d3.scaleLinear().domain(yRange).range([this.visHeight - 30, 30]);
+            return {...superProvided, scale: {x, y, flipped}};
+        }
+    }
+
+    class DataPoint extends ResponsiveVisElement {
+        render() {
+            if(!this.scale.x) {
+                return '';
+            }
+            const x = this.scale.flipped ? this.dependent : this.independent;
+            const y = this.scale.flipped ? this.independent : this.dependent;
+
+            return `
+                <svg>
+                    <circle r="${this.size}" fill="red" cx="${this.scale.x(x)}" cy="${this.scale.y(y)}"></circle>
+                </svg>`;
+        }
+    }
+
+    class AxisLeft extends ResponsiveVisElement {
+        render() {
+            return `<svg></svg>`;
+        }
+
+        doneRendering() {
+            if(!this.scale.y) {
+                return '';
+            }
+
+            const axis = d3.axisRight(this.scale.y).ticks(12);
+
+            d3.select(this).select('svg')
+                .append('g')
+                .attr("transform", `translate(10,0)`)
+                .call(axis);
+        }
+    }
+
+    class AxisBottom extends ResponsiveVisElement {
+        render() {
+            return `<svg></svg>`;
+        }
+
+        doneRendering() {
+            if(!this.scale.y) {
+                return '';
+            }
+
+            const axis = d3.axisBottom(this.scale.x).ticks(12);
+
+            d3.select(this).select('svg')
+                .append('g')
+                .attr("transform", `translate(0,${this.visHeight - 30})`)
+                .call(axis);
+        }
+    }
+
+    window.customElements.define('responsive-vis', ResponsiveVis);
+    window.customElements.define('vis-scale', VisScale);
+    window.customElements.define('data-point', DataPoint);
+    window.customElements.define('axis-left', AxisLeft);
+    window.customElements.define('axis-bottom', AxisBottom);
+
+    const resize = () => {
+        document.querySelector('responsive-vis').setAttribute('vis-width', `${window.innerWidth - 30}`);
+        document.querySelector('responsive-vis').setAttribute('vis-height', `${window.innerHeight - 30}`);
+    }
+
+    window.onresize = resize;
+    resize();
+</script>
