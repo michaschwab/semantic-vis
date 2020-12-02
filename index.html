@@ -1,8 +1,14 @@
 
 <responsive-vis vis-width="500" vis-height="300">
-    <vis-scale min-dependent="0" max-dependent="50" min-independent="0" max-independent="100">
-        <data-point size="10" independent="20" dependent="40"></data-point>
-        <data-point size="15" independent="30" dependent="42"></data-point>
+    <vis-scale min-dependent="0" max-dependent="100" min-independent="0" max-independent="8">
+        <data-point size="5" independent="1" dependent="12"></data-point>
+        <data-point size="15" independent="2" dependent="80"></data-point>
+        <data-point size="10" independent="3" dependent="42"></data-point>
+        <data-point size="12" independent="4" dependent="72"></data-point>
+        <data-point size="5" independent="5" dependent="52"></data-point>
+        <data-point size="5" independent="6" dependent="12"></data-point>
+        <data-point size="10" independent="7" dependent="72"></data-point>
+        <data-point size="15" independent="8" dependent="77"></data-point>
         <axis-left></axis-left>
         <axis-bottom></axis-bottom>
     </vis-scale>
@@ -100,14 +106,19 @@
     }
 
     class DataPoint extends ResponsiveVisElement {
+        dependent = 0;
+        independent = 0;
+
         render() {
-            if(!this.scale.x) {
-                return '';
-            }
+            if(!this.scale.y) { return ''; }
+
             const x = this.scale.flipped ? this.dependent : this.independent;
             const y = this.scale.flipped ? this.independent : this.dependent;
 
-            return `
+            return this.scale.flipped ? `
+                <svg>
+                    <rect fill="red" x="${this.scale.x(0)}" width="${this.scale.x(x)}" y="${this.scale.y(y)-5}" height="10"></rect>
+                </svg>` : `
                 <svg>
                     <circle r="${this.size}" fill="red" cx="${this.scale.x(x)}" cy="${this.scale.y(y)}"></circle>
                 </svg>`;
@@ -120,15 +131,13 @@
         }
 
         doneRendering() {
-            if(!this.scale.y) {
-                return '';
-            }
+            if(!this.scale.y) { return ''; }
 
-            const axis = d3.axisRight(this.scale.y).ticks(12);
+            const axis = d3.axisLeft(this.scale.y).ticks(12);
 
             d3.select(this).select('svg')
                 .append('g')
-                .attr("transform", `translate(10,0)`)
+                .attr("transform", `translate(30,0)`)
                 .call(axis);
         }
     }
