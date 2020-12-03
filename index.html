@@ -1,6 +1,6 @@
 
 <responsive-vis vis-width="500" vis-height="300">
-    <vis-scale  min-x1="0" max-x1="8" min-x2="0" max-x2="100">
+    <vis-scale min-x1="0" max-x1="8" min-x2="0" max-x2="100">
         <data-point size="5"  x1="1" x2="12"></data-point>
         <data-point size="15" x1="2" x2="80"></data-point>
         <data-point size="10" x1="3" x2="42"></data-point>
@@ -20,88 +20,9 @@
     }
 </style>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.2.0/d3.min.js" integrity="sha512-C2RveGuPIWqkaLAluvoxyiaN1XYNe5ss11urhZWZYBUA9Ydgj+hfGKPcxCzTwut1/fmjEZR7Ac35f2aycT8Ogw==" crossorigin="anonymous"></script>
+<script src="responsive-vis.js"></script>
 <script type="module">
-
-    class ResponsiveVisElement extends HTMLElement {
-        static get observedAttributes() {
-            return ['vis-width', 'vis-height'];
-        }
-
-        visWidth = 600;
-        visHeight = 400;
-
-        constructor() {
-            super();
-            this.setAllAttributes();
-            this.originalChildren = [...this.children];
-        }
-
-        setAllAttributes() {
-            const snakeToCamel = (str) => str.replace(
-                /([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', '')
-            );
-
-            for(const attribute of this.attributes) {
-                const value = `${parseInt(attribute.value)}` === attribute.value ? parseInt(attribute.value) : attribute.value;
-                this[snakeToCamel(attribute.name)] = value;
-            }
-        }
-
-        connectedCallback() {
-            this.setContents();
-        }
-
-        attributeChangedCallback() {
-            this.setAllAttributes();
-            this.setContents();
-        }
-
-        setContents() {
-            const slotHtml = !this.originalChildren.length ? '' :
-                `<foreignObject width="${this.visWidth}" height="${this.visHeight}" id="slot"></foreignObject>`;
-
-            this.innerHTML = this.render() + slotHtml;
-
-            if(this.originalChildren.length) {
-                const slot = this.querySelector('#slot');
-                const provide = this.provideToChildren();
-
-                this.originalChildren.forEach(child => {
-                    for(const attrName in provide) {
-                        child.setAttribute(attrName, provide[attrName]);
-                        child[attrName] = provide[attrName];
-                    }
-                    slot.appendChild(child);
-                });
-            }
-
-            this.doneRendering();
-        }
-
-        provideToChildren() {
-            return {
-                'vis-width': this.visWidth,
-                'vis-height': this.visHeight,
-            };
-        }
-
-        render() {
-            return '';
-        }
-
-        doneRendering() {}
-    }
-
-    class ResponsiveVis extends ResponsiveVisElement {
-        render() {
-            return `
-                <style>svg {position: absolute; width: ${this.visWidth}px; height: ${this.visHeight}px;</style>
-                <svg></svg>`;
-        }
-    }
-
     class VisScale extends ResponsiveVisElement {
         minX1 = 0;
         maxX1 = 0;
@@ -109,13 +30,18 @@
         maxX2 = 0;
 
         provideToChildren() {
-            const superProvided = super.provideToChildren();
             const flipped = this.visHeight > this.visWidth;
             const xRange = flipped ? [this.minX2, this.maxX2] : [this.minX1, this.maxX1];
             const yRange = flipped ? [this.minX1, this.maxX1] : [this.minX2, this.maxX2];
-            const x = d3.scaleLinear().domain(xRange).range([30, this.visWidth - 30]);
-            const y = d3.scaleLinear().domain(yRange).range([this.visHeight - 30, 30]);
-            return {...superProvided, scale: {x, y, flipped}};
+
+            return {
+                ...super.provideToChildren(),
+                scale: {
+                    x: d3.scaleLinear().domain(xRange).range([30, this.visWidth - 30]),
+                    y: d3.scaleLinear().domain(yRange).range([this.visHeight - 30, 30]),
+                    flipped
+                }
+            };
         }
     }
 
@@ -140,9 +66,7 @@
     }
 
     class AxisLeft extends ResponsiveVisElement {
-        render() {
-            return `<svg></svg>`;
-        }
+        render = () => `<svg></svg>`;
 
         doneRendering() {
             if(!this.scale.y) { return ''; }
@@ -157,25 +81,20 @@
     }
 
     class AxisBottom extends ResponsiveVisElement {
-        render() {
-            return `<svg></svg>`;
-        }
+        render = () => `<svg></svg>`;
 
         doneRendering() {
-            if(!this.scale.y) {
-                return '';
-            }
+            if(!this.scale.y) { return ''; }
 
             const axis = d3.axisBottom(this.scale.x).ticks(12);
 
             d3.select(this).select('svg')
                 .append('g')
-                .attr("transform", `translate(0,${this.visHeight - 30})`)
+                .attr("transform", `translate(0, ${this.visHeight - 30})`)
                 .call(axis);
         }
     }
 
-    window.customElements.define('responsive-vis', ResponsiveVis);
     window.customElements.define('vis-scale', VisScale);
     window.customElements.define('data-point', DataPoint);
     window.customElements.define('axis-left', AxisLeft);
