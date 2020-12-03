@@ -48,7 +48,21 @@
     }
 
     class DataGroup extends ResponsiveVisElement {
-        render = () => `<svg></svg>`;
+        render = () => `<svg><path d="" stroke="black" fill="none"></path></svg>`;
+
+        renderChildren() {
+            if(!this.scale.x) return '';
+
+            if(this.visWidth > 1000 || this.visHeight > this.visWidth) {
+                super.renderChildren();
+            } else {
+                const line = d3.line()
+                    .x(d => this.scale.x(d.getAttribute('x1')))
+                    .y(d => this.scale.y(d.getAttribute('x2')));
+
+                d3.select(this).select('path').attr('d', line(this.originalChildren));
+            }
+        }
     }
 
     class DataPoint extends ResponsiveVisElement {
@@ -90,7 +104,7 @@
         render = () => `<svg></svg>`;
 
         doneRendering() {
-            if(!this.scale.y) { return ''; }
+            if(!this.scale.x) { return ''; }
 
             const axis = d3.axisBottom(this.scale.x).ticks(12);
 

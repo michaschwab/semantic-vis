@@ -35,12 +35,14 @@ class ResponsiveVisElement extends HTMLElement {
     }
 
     setContents() {
-        const slotHtml = !this.originalChildren.length ? '' :
-            `<foreignObject width="${this.visWidth}" height="${this.visHeight}" id="slot"></foreignObject>`;
+        this.innerHTML = this.render();
+        this.renderChildren();
+        this.doneRendering();
+    }
 
-        this.innerHTML = this.render() + slotHtml;
-
+    renderChildren() {
         if(this.originalChildren.length) {
+            this.innerHTML += `<foreignObject width="${this.visWidth}" height="${this.visHeight}" id="slot"></foreignObject>`;
             const slot = this.querySelector('#slot');
             const provide = this.provideToChildren();
 
@@ -52,8 +54,6 @@ class ResponsiveVisElement extends HTMLElement {
                 slot.appendChild(child);
             });
         }
-
-        this.doneRendering();
     }
 
     provideToChildren() {
