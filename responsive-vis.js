@@ -1,3 +1,9 @@
+const snakeToCamel = (str) => str.replace(
+    /([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '')
+);
+const camelToSnakeCase = str => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
+
+
 class ResponsiveVisElement extends HTMLElement {
     static get observedAttributes() {
         return ['vis-width', 'vis-height'];
@@ -13,10 +19,6 @@ class ResponsiveVisElement extends HTMLElement {
     }
 
     setAllAttributes() {
-        const snakeToCamel = (str) => str.replace(
-            /([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', '')
-        );
-
         for(const attribute of this.attributes) {
             const value = `${parseInt(attribute.value)}` === attribute.value ? parseInt(attribute.value) : attribute.value;
             this[snakeToCamel(attribute.name)] = value;
@@ -45,7 +47,7 @@ class ResponsiveVisElement extends HTMLElement {
             this.originalChildren.forEach(child => {
                 for(const attrName in provide) {
                     child.setAttribute(attrName, provide[attrName]);
-                    child[attrName] = provide[attrName];
+                    child[snakeToCamel(attrName)] = provide[attrName];
                 }
                 slot.appendChild(child);
             });
@@ -55,10 +57,14 @@ class ResponsiveVisElement extends HTMLElement {
     }
 
     provideToChildren() {
-        return {
-            'vis-width': this.visWidth,
-            'vis-height': this.visHeight,
-        };
+        const skipped = ['originalChildren', 'render'];
+        const props = Object.getOwnPropertyNames(this).filter(p => !skipped.includes(p));
+
+        const provide = {};
+        for(const prop of props) {
+            provide[camelToSnakeCase(prop)] = this[prop];
+        }
+        return provide;
     }
 
     render() {
@@ -67,7 +73,6 @@ class ResponsiveVisElement extends HTMLElement {
 
     doneRendering() {}
 }
-
 
 class ResponsiveVis extends ResponsiveVisElement {
     render() {

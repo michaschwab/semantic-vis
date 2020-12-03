@@ -1,14 +1,16 @@
 
 <responsive-vis vis-width="500" vis-height="300">
     <vis-scale min-x1="0" max-x1="8" min-x2="0" max-x2="100">
-        <data-point size="5"  x1="1" x2="12"></data-point>
-        <data-point size="15" x1="2" x2="80"></data-point>
-        <data-point size="10" x1="3" x2="42"></data-point>
-        <data-point size="12" x1="4" x2="72"></data-point>
-        <data-point size="5"  x1="5" x2="52"></data-point>
-        <data-point size="5"  x1="6" x2="12"></data-point>
-        <data-point size="10" x1="7" x2="72"></data-point>
-        <data-point size="15" x1="8" x2="77"></data-point>
+        <data-group>
+            <data-point size="5"  x1="1" x2="12"></data-point>
+            <data-point size="15" x1="2" x2="80"></data-point>
+            <data-point size="10" x1="3" x2="42"></data-point>
+            <data-point size="12" x1="4" x2="72"></data-point>
+            <data-point size="5"  x1="5" x2="52"></data-point>
+            <data-point size="5"  x1="6" x2="12"></data-point>
+            <data-point size="10" x1="7" x2="72"></data-point>
+            <data-point size="15" x1="8" x2="77"></data-point>
+        </data-group>
         <axis-left></axis-left>
         <axis-bottom></axis-bottom>
     </vis-scale>
@@ -43,6 +45,10 @@
                 }
             };
         }
+    }
+
+    class DataGroup extends ResponsiveVisElement {
+        render = () => `<svg></svg>`;
     }
 
     class DataPoint extends ResponsiveVisElement {
@@ -96,6 +102,7 @@
     }
 
     window.customElements.define('vis-scale', VisScale);
+    window.customElements.define('data-group', DataGroup);
     window.customElements.define('data-point', DataPoint);
     window.customElements.define('axis-left', AxisLeft);
     window.customElements.define('axis-bottom', AxisBottom);
