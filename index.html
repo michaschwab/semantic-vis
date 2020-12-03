@@ -1,18 +1,24 @@
 
 <responsive-vis vis-width="500" vis-height="300">
-    <vis-scale min-dependent="0" max-dependent="100" min-independent="0" max-independent="8">
-        <data-point size="5" independent="1" dependent="12"></data-point>
-        <data-point size="15" independent="2" dependent="80"></data-point>
-        <data-point size="10" independent="3" dependent="42"></data-point>
-        <data-point size="12" independent="4" dependent="72"></data-point>
-        <data-point size="5" independent="5" dependent="52"></data-point>
-        <data-point size="5" independent="6" dependent="12"></data-point>
-        <data-point size="10" independent="7" dependent="72"></data-point>
-        <data-point size="15" independent="8" dependent="77"></data-point>
+    <vis-scale  min-x1="0" max-x1="8" min-x2="0" max-x2="100">
+        <data-point size="5"  x1="1" x2="12"></data-point>
+        <data-point size="15" x1="2" x2="80"></data-point>
+        <data-point size="10" x1="3" x2="42"></data-point>
+        <data-point size="12" x1="4" x2="72"></data-point>
+        <data-point size="5"  x1="5" x2="52"></data-point>
+        <data-point size="5"  x1="6" x2="12"></data-point>
+        <data-point size="10" x1="7" x2="72"></data-point>
+        <data-point size="15" x1="8" x2="77"></data-point>
         <axis-left></axis-left>
         <axis-bottom></axis-bottom>
     </vis-scale>
 </responsive-vis>
+
+<style>
+    data-point {
+        fill: pink;
+    }
+</style>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.2.0/d3.min.js" integrity="sha512-C2RveGuPIWqkaLAluvoxyiaN1XYNe5ss11urhZWZYBUA9Ydgj+hfGKPcxCzTwut1/fmjEZR7Ac35f2aycT8Ogw==" crossorigin="anonymous"></script>
@@ -22,6 +28,9 @@
         static get observedAttributes() {
             return ['vis-width', 'vis-height'];
         }
+
+        visWidth = 600;
+        visHeight = 400;
 
         constructor() {
             super();
@@ -94,11 +103,16 @@
     }
 
     class VisScale extends ResponsiveVisElement {
+        minX1 = 0;
+        maxX1 = 0;
+        minX2 = 0;
+        maxX2 = 0;
+
         provideToChildren() {
             const superProvided = super.provideToChildren();
             const flipped = this.visHeight > this.visWidth;
-            const xRange = flipped ? [this.minDependent, this.maxDependent] : [this.minIndependent, this.maxIndependent];
-            const yRange = flipped ? [this.minIndependent, this.maxIndependent] : [this.minDependent, this.maxDependent];
+            const xRange = flipped ? [this.minX2, this.maxX2] : [this.minX1, this.maxX1];
+            const yRange = flipped ? [this.minX1, this.maxX1] : [this.minX2, this.maxX2];
             const x = d3.scaleLinear().domain(xRange).range([30, this.visWidth - 30]);
             const y = d3.scaleLinear().domain(yRange).range([this.visHeight - 30, 30]);
             return {...superProvided, scale: {x, y, flipped}};
@@ -106,21 +120,21 @@
     }
 
     class DataPoint extends ResponsiveVisElement {
-        dependent = 0;
-        independent = 0;
+        x1 = 0;
+        x2 = 0;
 
         render() {
             if(!this.scale.y) { return ''; }
 
-            const x = this.scale.flipped ? this.dependent : this.independent;
-            const y = this.scale.flipped ? this.independent : this.dependent;
+            const x = this.scale.flipped ? this.x2 : this.x1;
+            const y = this.scale.flipped ? this.x1 : this.x2;
 
             return this.scale.flipped ? `
                 <svg>
-                    <rect fill="red" x="${this.scale.x(0)}" width="${this.scale.x(x)}" y="${this.scale.y(y)-5}" height="10"></rect>
+                    <rect x="${this.scale.x(0)}" width="${this.scale.x(x)}" y="${this.scale.y(y)-5}" height="10"></rect>
                 </svg>` : `
                 <svg>
-                    <circle r="${this.size}" fill="red" cx="${this.scale.x(x)}" cy="${this.scale.y(y)}"></circle>
+                    <circle r="${this.size}" cx="${this.scale.x(x)}" cy="${this.scale.y(y)}"></circle>
                 </svg>`;
         }
     }
