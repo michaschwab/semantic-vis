@@ -51,11 +51,13 @@
         render = () => `<svg><path d="" stroke="black" fill="none"></path></svg>`;
 
         renderChildren() {
+            super.renderChildren();
+
             if(!this.scale.x) return '';
 
-            if(this.visWidth > 1000 || this.visHeight > this.visWidth) {
-                super.renderChildren();
-            } else {
+            if(this.visWidth < 1000 && this.visHeight < this.visWidth) {
+                this.querySelector('#slot').style.visibility = 'hidden';
+
                 const line = d3.line()
                     .x(d => this.scale.x(d.getAttribute('x1')))
                     .y(d => this.scale.y(d.getAttribute('x2')));
