@@ -1,0 +1,34 @@
+<h1>One Data Source, Three Representations</h1>
+
+<iframe src="./index.html" width="250" height="400"></iframe>
+<iframe src="./index.html" width="450" height="400"></iframe>
+<iframe src="./index.html" width="700" height="400"></iframe>
+
+<h2>Visualization Content</h2>
+
+<xmp style="border: 1px solid #ccc; padding: 2px 5px; margin: 0 10px">
+<responsive-vis vis-width="500" vis-height="300">
+    <vis-scale min-x1="0" max-x1="8" min-x2="0" max-x2="100">
+        <data-group>
+            <data-point size="5"  x1="1" x2="12"></data-point>
+            <data-point size="15" x1="2" x2="80"></data-point>
+            <data-point size="10" x1="3" x2="42"></data-point>
+            <data-point size="12" x1="4" x2="72"></data-point>
+            <data-point size="5"  x1="5" x2="52"></data-point>
+            <data-point size="5"  x1="6" x2="12"></data-point>
+            <data-point size="10" x1="7" x2="72"></data-point>
+            <data-point size="15" x1="8" x2="77"></data-point>
+        </data-group>
+        <axis-left></axis-left>
+        <axis-bottom></axis-bottom>
+    </vis-scale>
+</responsive-vis>
+</xmp>
+
+<p>This responsive visualization, built with web components, changes the visual representation of the data depending on
+    the size of the window. All three are the same website rendering the same data. The last one displays each data
+    point as a cirlce. The middle representation skips the rendering of individual data points, but instead uses the
+    data-group to represent all nested data with a single line element. The first visualization is for mobile, as it
+    flips the axes and displays the data as bars.</p>
+
+<p>You can open the individual demo page and resize the window at <a href="./index.html">this link</a>.</p>
