@@ -17,10 +17,21 @@
 </responsive-vis>
 
 <style>
-    data-point {
+    circle {
         fill: pink;
     }
 </style>
+<!--
+<div class="responsive-vis">
+    <style>
+        .responsive-vis svg {
+            position: absolute;
+            width: 500px;
+            height: 300px;
+        }
+    </style>
+    <svg><g><circle r="5" cx="300" cy="200" fill="blue"></circle><circle r="15" cx="300" cy="200"></circle><circle r="10" cx="300" cy="200"></circle><circle r="12" cx="300" cy="200"></circle><circle r="5" cx="300" cy="200"></circle><circle r="5" cx="300" cy="200"></circle><circle r="10" cx="300" cy="200"></circle><circle r="15" cx="300" cy="200"></circle></g></svg>
+</div>-->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.2.0/d3.min.js" integrity="sha512-C2RveGuPIWqkaLAluvoxyiaN1XYNe5ss11urhZWZYBUA9Ydgj+hfGKPcxCzTwut1/fmjEZR7Ac35f2aycT8Ogw==" crossorigin="anonymous"></script>
 <script src="responsive-vis.js"></script>
@@ -48,9 +59,12 @@
     }
 
     class DataGroup extends ResponsiveVisElement {
-        render = () => `<svg><path d="" stroke="black" fill="none"></path></svg>`;
+        render() {
+            return '<g></g>';
+            // `<path d="" stroke="black" fill="none"></path>`;
+        }
 
-        renderChildren() {
+        /*renderChildren() {
             super.renderChildren();
 
             if(!this.scale.x) return '';
@@ -64,7 +78,7 @@
 
                 d3.select(this).select('path').attr('d', line(this.originalChildren));
             }
-        }
+        }*/
     }
 
     class DataPoint extends ResponsiveVisElement {
@@ -77,25 +91,23 @@
             const x = this.scale.flipped ? this.x2 : this.x1;
             const y = this.scale.flipped ? this.x1 : this.x2;
 
-            return this.scale.flipped ? `
-                <svg>
-                    <rect x="${this.scale.x(0)}" width="${this.scale.x(x)}" y="${this.scale.y(y)-5}" height="10"></rect>
-                </svg>` : `
-                <svg>
-                    <circle r="${this.size}" cx="${this.scale.x(x)}" cy="${this.scale.y(y)}"></circle>
-                </svg>`;
+            return this.scale.flipped
+                ? `<rect x="${this.scale.x(0)}" width="${this.scale.x(x)}" y="${this.scale.y(y)-5}" height="10"></rect>`
+                : `<circle r="${this.size}" cx="${this.scale.x(x)}" cy="${this.scale.y(y)}"></circle></svg>`;
         }
     }
 
     class AxisLeft extends ResponsiveVisElement {
-        render = () => `<svg></svg>`;
+        render = () => `<g></g>`;
 
         doneRendering() {
+            super.doneRendering();
+
             if(!this.scale.y) { return ''; }
 
             const axis = d3.axisLeft(this.scale.y).ticks(12);
 
-            d3.select(this).select('svg')
+            d3.select(this.element)
                 .append('g')
                 .attr("transform", `translate(30,0)`)
                 .call(axis);
@@ -103,14 +115,16 @@
     }
 
     class AxisBottom extends ResponsiveVisElement {
-        render = () => `<svg></svg>`;
+        render = () => `<g></g>`;
 
         doneRendering() {
+            super.doneRendering();
+
             if(!this.scale.x) { return ''; }
 
             const axis = d3.axisBottom(this.scale.x).ticks(12);
 
-            d3.select(this).select('svg')
+            d3.select(this.element)
                 .append('g')
                 .attr("transform", `translate(0, ${this.visHeight - 30})`)
                 .call(axis);
