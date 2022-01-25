@@ -1,6 +1,6 @@
-# ResponsiveVis
-This is a new project in which I explore responsive and accessible
-data visualizations using web components.
+# SemanticVis
+This is a new project in which I explore semantic, responsive and accessible data visualizations using web components.
+I believe that we need a HTML5 of SVGs.
 
 ## One Data Source, Three Representations
 Below you can see the same visualization, with the same visualization **content**,

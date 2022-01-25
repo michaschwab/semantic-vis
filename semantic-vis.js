@@ -4,7 +4,7 @@ const snakeToCamel = (str) => str.replace(
 const camelToSnakeCase = str => str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
 
 
-class ResponsiveVisElement extends HTMLElement {
+class SemanticVisElement extends HTMLElement {
     static get observedAttributes() {
         return ['vis-width', 'vis-height'];
     }
@@ -74,7 +74,7 @@ class ResponsiveVisElement extends HTMLElement {
     doneRendering() {}
 }
 
-class ResponsiveVis extends ResponsiveVisElement {
+class SemanticVis extends SemanticVisElement {
     render() {
         return `
                 <style>
@@ -88,4 +88,4 @@ class ResponsiveVis extends ResponsiveVisElement {
     }
 }
 
-window.customElements.define('responsive-vis', ResponsiveVis);
+window.customElements.define('responsive-vis', SemanticVis);
