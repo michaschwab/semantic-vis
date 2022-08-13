@@ -45,4 +45,4 @@ point as a cirlce. The middle representation skips the rendering of individual d
 data-group to represent all nested data with a single line element. The first visualization is for mobile, as it
 flips the axes and displays the data as bars.
 
-Please try out the [Demo](https://michaschwab.github.io/responsive-vis/demo)!
+Please try out the [Demo](https://michaschwab.github.io/semantic-vis/demo)!
