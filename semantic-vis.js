@@ -78,7 +78,7 @@ class SemanticVis extends SemanticVisElement {
     render() {
         return `
                 <style>
-                responsive-vis svg {
+                semantic-vis svg {
                     position: absolute;
                     width: ${this.visWidth}px;
                     height: ${this.visHeight}px;
@@ -88,4 +88,4 @@ class SemanticVis extends SemanticVisElement {
     }
 }
 
-window.customElements.define('responsive-vis', SemanticVis);
+window.customElements.define('semantic-vis', SemanticVis);
